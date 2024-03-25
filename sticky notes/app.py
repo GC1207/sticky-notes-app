@@ -158,6 +158,32 @@ class StickyNote(tk.Toplevel):
 
     def is_maximized(self):
         return self.state() == "zoomed"
+    
+    def delete_folder(self):
+        selection = self.folder_listbox.curselection()
+        if selection:
+            folder_index = selection[0]
+            folder = self.folders[folder_index]
+            confirm = tk.messagebox.askyesno("Delete Folder", f"Are you sure you want to delete the folder '{folder.name}'?")
+            if confirm:
+                self.close_notes()
+                self.folders.remove(folder)
+                self.folder_listbox.delete(folder_index)
+                self.save_folders()
+                self.set_status(f"Folder '{folder.name}' deleted.")
+
+    def rename_folder(self):
+        selection = self.folder_listbox.curselection()
+        if selection:
+            folder_index = selection[0]
+            folder = self.folders[folder_index]
+            new_name = tk.simpledialog.askstring("Rename Folder", "Enter the new folder name:", initialvalue=folder.name)
+            if new_name and new_name != folder.name:
+                folder.name = new_name
+                self.folder_listbox.delete(folder_index)
+                self.folder_listbox.insert(folder_index, new_name)
+                self.save_folders()
+                self.set_status(f"Folder renamed to '{new_name}'.")
 
 class Folder:
     def __init__(self, name, color="lightgray"):
@@ -178,12 +204,17 @@ class StickyNoteApp(tk.Tk):
         self.folders = []
         self.current_folder = None
 
-
         self.folder_frame = tk.Frame(self)
         self.folder_frame.pack(side=tk.LEFT, padx=10, pady=10)
 
         self.create_folder_button = tk.Button(self.folder_frame, text="Create Folder", command=self.create_folder)
         self.create_folder_button.pack(pady=5)
+
+        self.delete_folder_button = tk.Button(self.folder_frame, text="Delete Folder", command=self.delete_folder)
+        self.delete_folder_button.pack(pady=5)
+
+        self.rename_folder_button = tk.Button(self.folder_frame, text="Rename Folder", command=self.rename_folder)
+        self.rename_folder_button.pack(pady=5)
 
         self.open_notes_button = tk.Button(self.folder_frame, text="Open Notes", command=self.open_notes)
         self.open_notes_button.pack(pady=5)
@@ -275,6 +306,34 @@ class StickyNoteApp(tk.Tk):
             self.set_status(f"Notes from folder '{self.current_folder.name}' saved successfully.")
         else:
             self.set_status("Please select a folder first.")
+
+
+    def delete_folder(self):
+        selection = self.folder_listbox.curselection()
+        if selection:
+            folder_index = selection[0]
+            folder = self.folders[folder_index]
+            confirm = tk.messagebox.askyesno("Delete Folder", f"Are you sure you want to delete the folder '{folder.name}'?")
+            if confirm:
+                self.close_notes()
+                self.folders.remove(folder)
+                self.folder_listbox.delete(folder_index)
+                self.save_folders()
+                self.set_status(f"Folder '{folder.name}' deleted.")
+
+    def rename_folder(self):
+        selection = self.folder_listbox.curselection()
+        if selection:
+            folder_index = selection[0]
+            folder = self.folders[folder_index]
+            new_name = tk.simpledialog.askstring("Rename Folder", "Enter the new folder name:", initialvalue=folder.name)
+            if new_name and new_name != folder.name:
+                folder.name = new_name
+                self.folder_listbox.delete(folder_index)
+                self.folder_listbox.insert(folder_index, new_name)
+                self.save_folders()
+                self.set_status(f"Folder renamed to '{new_name}'.")
+
 
     def save_folders(self):
         folders_data = []
